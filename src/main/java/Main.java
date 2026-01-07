@@ -1,4 +1,24 @@
-package PACKAGE_NAME;
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 public class Main {
+    public static void main(String[] args) {
+        // inizializza database
+        try {
+            DataService.getInstance();
+        } catch (Exception e) {
+            System.err.println("Errore database: " + e.getMessage());
+            System.exit(-1);
+        }
+
+        String botToken = ConfigurationSingleton.getInstance().getProperty("BOT_TOKEN");
+
+        try (TelegramBotsLongPollingApplication botsApp = new TelegramBotsLongPollingApplication()) {
+            botsApp.registerBot(botToken, new CocktailBot(botToken));
+            System.out.println("CocktailBot avviato correttamente!");
+
+            Thread.currentThread().join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
