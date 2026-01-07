@@ -34,10 +34,8 @@ public class CocktailBot implements LongPollingSingleThreadUpdateConsumer {
             e.printStackTrace();
         }
 
-        // Analisi comandi
         String responseText = analyzeText(chatId, text);
 
-        // Invia risposta
         SendMessage.SendMessageBuilder<?, ?> builder = SendMessage.builder()
                 .chatId(chatId)
                 .text(responseText);

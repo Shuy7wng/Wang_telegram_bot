@@ -2,7 +2,6 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 public class Main {
     public static void main(String[] args) {
-        // inizializza database
         try {
             DataService.getInstance();
         } catch (Exception e) {

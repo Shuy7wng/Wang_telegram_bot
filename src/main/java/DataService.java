@@ -7,16 +7,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Classe singleton per la gestione del database SQLite.
- * Gestisce utenti, query sui cocktail e statistiche.
- */
 public class DataService {
     private static DataService instance;
     private Connection connection;
 
     private DataService() throws SQLException {
-        // Connessione al database SQLite
         connection = DriverManager.getConnection("jdbc:sqlite:cocktailbot.db");
         createTables();
     }
@@ -100,10 +95,8 @@ public class DataService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1; // utente non trovato
+        return -1;
     }
-
-    // --- METODI QUERY COCKTAIL ---
 
     // Salva la query cocktail dell'utente
     public void saveCocktailQuery(long chatId, String cocktailName) {
