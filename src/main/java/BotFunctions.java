@@ -78,7 +78,6 @@ public class BotFunctions {
             return "Errore nella richiesta: " + e.getMessage();
         }
     }
-
     public String getHelp() {
         return "Comandi disponibili:\n" +
                 "/random - Ottieni un cocktail casuale\n" +
