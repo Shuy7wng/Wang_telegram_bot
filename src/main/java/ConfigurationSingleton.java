@@ -20,7 +20,6 @@ public class ConfigurationSingleton {
         if (instance == null) instance = new ConfigurationSingleton();
         return instance;
     }
-
     public String getProperty(String key) {
         return config.getString(key);
     }
