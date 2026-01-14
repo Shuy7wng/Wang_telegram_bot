@@ -20,8 +20,12 @@ public class CocktailBot implements LongPollingUpdateConsumer {
     private final OkHttpTelegramClient telegramClient;
     private final BotFunctions botFunctions = new BotFunctions();
 
+    private final File[] gifs;
+
     public CocktailBot(String botToken) {
         this.telegramClient = new OkHttpTelegramClient(botToken);
+        File folder = new File("src/main/resources/gifs");
+        this.gifs = folder.listFiles((dir, name) -> name.endsWith(".gif"));
     }
 
     @Override
@@ -33,24 +37,22 @@ public class CocktailBot implements LongPollingUpdateConsumer {
 
     private void handleStart(long chatId, String username) {
         try {
-            File folder = new File("src/main/resources/gifs");
-            File[] gifs = folder.listFiles((dir, name) -> name.endsWith(".gif"));
             if (gifs == null || gifs.length == 0) return;
 
             File gifFile = gifs[new Random().nextInt(gifs.length)];
-            InputFile inputFile = new InputFile(gifFile);
 
-            SendAnimation animation = SendAnimation.builder()
-                    .chatId(chatId)
-                    .animation(inputFile)
-                    .caption("Benvenuto " + username + " negli alcolisti anonimi! 🍹")
-                    .build();
-
-            telegramClient.execute(animation);
+            telegramClient.execute(
+                    org.telegram.telegrambots.meta.api.methods.send.SendDocument.builder()
+                            .chatId(chatId)
+                            .document(new InputFile(gifFile))
+                            .caption("Benvenuto " + username + " negli alcolisti anonimi! 🍹")
+                            .build()
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     private void handleUpdate(Update update) {
         try {
@@ -177,7 +179,6 @@ public class CocktailBot implements LongPollingUpdateConsumer {
                     String cocktailName = data.substring(6);
                     db.addFavorite(chatId, cocktailName);
 
-                    // Risposta al callback (serve per far sparire il loading)
                     telegramClient.execute(AnswerCallbackQuery.builder()
                             .callbackQueryId(callbackId)
                             .text("❤️ \"" + cocktailName + "\" aggiunto ai preferiti!")

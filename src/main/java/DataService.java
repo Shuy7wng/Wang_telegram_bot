@@ -129,10 +129,10 @@ public class DataService {
         List<String> favs = getFavorites(chatId);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Profilo utente\n");
-        sb.append("Username: ").append(username).append("\n");
-        sb.append("Alcolizzato dal : ").append(createdAt).append("\n\n");
-        sb.append("Alcolici preferiti:\n");
+        sb.append("🙋🏻‍♂️ Profilo utente\n");
+        sb.append("🎈 Username: ").append(username).append("\n");
+        sb.append("🎀 Alcolizzato dal : ").append(createdAt).append("\n\n");
+        sb.append("🍸 Alcolici preferiti:\n");
 
         if (favs.isEmpty()) {
             sb.append("Aggiungi qualcosa ai preferiti!\n");

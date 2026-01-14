@@ -1,41 +1,44 @@
-COCKTAILBOT – TELEGRAM BOT
+# CocktailBot – Telegram Bot
 
-CocktailBot è un bot Telegram divertente e informativo che permette di scoprire cocktail, cercare ricette per ingrediente e ottenere statistiche sulle proprie ricerche.
-Il bot utilizza l’API gratuita TheCocktailDB
- per recuperare informazioni sui cocktail e SQLite per memorizzare utenti, cronologia e statistiche.
+**CocktailBot** è un bot Telegram divertente e istrutivo che permette di scoprire cocktail, cercare ricette per ingrediente e gestire i propri preferiti.
+Il bot utilizza l’API gratuita [TheCocktailDB](https://www.thecocktaildb.com/) per recuperare informazioni sui cocktail e SQLite per memorizzare utenti, cronologia e preferiti.
 
-📌 FUNZIONALITÀ
+---
 
-/RANDOM – Ottieni un cocktail casuale
+## 📌 Funzionalità e Comandi
 
-/COCKTAIL <NOME> – Informazioni dettagliate su un cocktail
+| Comando | Descrizione                                                                                                                           |
+|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `/start` | Messaggio di benvenuto con GIF casuale |
+| `/random` | Ottieni un cocktail casuale con immagine e descrizione                                                                                |
+| `/cocktail <nome>` | Informazioni dettagliate su un cocktail specifico                                                                                     |
+| `/ingredient <ingrediente>` | Lista di cocktail contenenti l’ingrediente specificato                                                                                |
+| `/adoro <nome>` | Aggiungi un cocktail ai tuoi preferiti                                                                                                |
+| `/elimina <nome>` | Rimuovi un cocktail dai tuoi preferiti                                                                                                |
+| `/profilo` | Mostra i tuoi cocktail preferiti e statistiche personali                                                                              |
+| `/help` | Mostra la lista completa dei comandi disponibili                                                                                      |
 
-/INGREDIENT <INGREDIENTE> – Lista di cocktail contenenti l’ingrediente specificato
+---
 
-/HISTORY – Mostra le ultime 20 ricerche di cocktail effettuate
+## 🛠 Tecnologie Utilizzate
 
-/STATS – Visualizza il numero totale di cocktail consultati
+- **Linguaggio:** Java 21
+- **Build Tool:** Maven
+- **Telegram Library:** TelegramBots Java Library
+- **Database:** SQLite
+- **API Esterna:** [TheCocktailDB API](https://www.thecocktaildb.com/)
 
-/HELP – Lista comandi disponibili
+---
 
-🛠 TECNOLOGIE UTILIZZATE
+## 📚 Link Utili
 
-Linguaggio: Java 21
+- [Documentazione API TheCocktailDB](https://www.thecocktaildb.com/api.php)
+- [TelegramBots Java Library](https://github.com/rubenlagus/TelegramBots)
+- [BotFather su Telegram](https://t.me/BotFather)
 
-Build Tool: Maven
+---
 
-Telegram Library: TelegramBots Java Library
+### ✅ Note
 
-Database: SQLite
-
-API Esterna: TheCocktailDB API
-
-Gestione Configurazioni: Apache Commons Configuration
-
-📚 LINK UTILI
-
-DOCUMENTAZIONE API THECOCKTAILDB
-
-TELEGRAMBOTS JAVA LIBRARY
-
-BOTFATHER SU TELEGRAM
+- Dopo il comando `/random` o `/cocktail <nome>` comparirà un bottone "❤️ Adoro" per aggiungere subito il cocktail ai preferiti.
+- Il bot tiene traccia dei cocktail aggiunti e rimossi tramite i comandi `/adoro` e `/elimina`.

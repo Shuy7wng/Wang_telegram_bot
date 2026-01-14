@@ -12,17 +12,14 @@ public class BotFunctions {
     private final Gson gson = new Gson();
 
     public static class CocktailInfo {
-        private final String cocktailName;  // NOME del cocktail
         private final String description;   // TESTO
         private final String imageUrl;      // URL immagine
 
         public CocktailInfo(String cocktailName, String description, String imageUrl) {
-            this.cocktailName = cocktailName;
             this.description = description;
             this.imageUrl = imageUrl;
         }
 
-        public String getCocktailName() { return cocktailName; }
         public String getDescription() { return description; }
         public String getImageUrl() { return imageUrl; }
     }
