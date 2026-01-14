@@ -169,7 +169,7 @@ public class CocktailBot implements LongPollingUpdateConsumer {
             }
 
             if (update.hasCallbackQuery()) {
-                String data = update.getCallbackQuery().getData(); // es: "adoro:Mojito"
+                String data = update.getCallbackQuery().getData();
                 long chatId = update.getCallbackQuery().getMessage().getChatId();
                 String callbackId = update.getCallbackQuery().getId(); // id della callback
 
@@ -181,7 +181,7 @@ public class CocktailBot implements LongPollingUpdateConsumer {
                     telegramClient.execute(AnswerCallbackQuery.builder()
                             .callbackQueryId(callbackId)
                             .text("❤️ \"" + cocktailName + "\" aggiunto ai preferiti!")
-                            .showAlert(false) // true se vuoi popup, false solo toast
+                            .showAlert(false)
                             .build()
                     );
                 }
@@ -199,6 +199,7 @@ public class CocktailBot implements LongPollingUpdateConsumer {
                     .photo(new InputFile(cocktail.getImageUrl()))
                     .build());
         }
+        //bottone adoro
         InlineKeyboardButton button = InlineKeyboardButton.builder()
                 .text("❤️ Adoro")
                 .callbackData("adoro:" + extractCocktailName(cocktail.getDescription()))
