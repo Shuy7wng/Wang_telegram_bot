@@ -37,7 +37,16 @@ Il bot utilizza l’API gratuita [TheCocktailDB](https://www.thecocktaildb.com/)
 - [BotFather su Telegram](https://t.me/BotFather)
 
 ---
+## 📷 ScreenShot utilizzo
 
+![](screenshots/screenshot1.jpeg)
+![](screenshots/screenshot2.jpeg)
+![](screenshots/screenshot3.jpeg)
+![](screenshots/screenshot4.jpeg)
+![](screenshots/screenshot5.jpeg)
+![](screenshots/screenshot6.jpeg)
+
+---
 ### ✅ Note
 
 - Dopo il comando `/random` o `/cocktail <nome>` comparirà un bottone "❤️ Adoro" per aggiungere subito il cocktail ai preferiti.
