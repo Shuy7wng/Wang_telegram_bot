@@ -13,11 +13,11 @@ public class Main {
 
         try (TelegramBotsLongPollingApplication botsApp = new TelegramBotsLongPollingApplication()) {
             botsApp.registerBot(botToken, new CocktailBot(botToken));
-            System.out.println("CocktailBot avviato correttamente!");
-
+            System.out.println("Cock-tailBot avviato correttamente!");
             Thread.currentThread().join();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
+

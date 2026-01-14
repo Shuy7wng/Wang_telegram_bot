@@ -1,9 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +6,17 @@ public class DataService {
     private static DataService instance;
     private Connection connection;
 
-    private DataService() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:sqlite:cocktailbot.db");
-        createTables();
+    private DataService() {
+        try {
+            connection = DriverManager.getConnection("jdbc:sqlite:src/main/database/cocktailbot.db");
+            createTables();
+            System.out.println("Godo");
+        } catch (SQLException e) {
+            System.err.println("C'è da piangere qui");
+            e.printStackTrace();
+        }
     }
 
-    // Singleton
     public static DataService getInstance() throws SQLException {
         if (instance == null) {
             instance = new DataService();
@@ -24,37 +24,30 @@ public class DataService {
         return instance;
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    // Creazione tabelle
     private void createTables() throws SQLException {
-        try (Statement stmt = connection.createStatement()) {
-            // Tabella utenti
-            String sqlUsers = "CREATE TABLE IF NOT EXISTS users (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "chat_id INTEGER UNIQUE NOT NULL," +
-                    "username TEXT," +
-                    "last_command TEXT," +
-                    "created_at DATETIME DEFAULT CURRENT_TIMESTAMP" +
-                    ");";
-            stmt.execute(sqlUsers);
+        Statement stmt = connection.createStatement();
 
-            // Tabella query cocktail
-            String sqlCocktails = "CREATE TABLE IF NOT EXISTS cocktail_queries (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "user_id INTEGER NOT NULL," +
-                    "cocktail_name TEXT," +
-                    "queried_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                    "FOREIGN KEY(user_id) REFERENCES users(id)" +
-                    ");";
-            stmt.execute(sqlCocktails);
-        }
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                chat_id INTEGER UNIQUE NOT NULL,
+                username TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """);
+
+        stmt.execute("""
+            CREATE TABLE IF NOT EXISTS favorites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                alcohol_name TEXT NOT NULL,
+                added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+        """);
     }
 
-    // Inserisce un nuovo utente se non esiste
-    public void addUser(long chatId, String username) {
+    public void saveUser(long chatId, String username) {
         try {
             PreparedStatement stmt = connection.prepareStatement(
                     "INSERT OR IGNORE INTO users(chat_id, username) VALUES (?, ?)"
@@ -67,95 +60,87 @@ public class DataService {
         }
     }
 
-    // Aggiorna l'ultimo comando dell'utente
-    public void updateLastCommand(long chatId, String command) {
-        try {
-            PreparedStatement stmt = connection.prepareStatement(
-                    "UPDATE users SET last_command = ? WHERE chat_id = ?"
-            );
-            stmt.setString(1, command);
-            stmt.setLong(2, chatId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Ottiene l'id utente tramite chat_id
-    public int getUserId(long chatId) {
-        try {
-            PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT id FROM users WHERE chat_id = ?"
-            );
-            stmt.setLong(1, chatId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public int getUserId(long chatId) throws SQLException {
+        PreparedStatement stmt = connection.prepareStatement(
+                "SELECT id FROM users WHERE chat_id = ?"
+        );
+        stmt.setLong(1, chatId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) return rs.getInt("id");
         return -1;
     }
 
-    // Salva la query cocktail dell'utente
-    public void saveCocktailQuery(long chatId, String cocktailName) {
+    public void  addFavorite(long chatId, String alcoholName) throws SQLException {
         int userId = getUserId(chatId);
-        if (userId == -1) return;
 
+        PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO favorites(user_id, alcohol_name) VALUES (?, ?)"
+        );
+        stmt.setInt(1, userId);
+        stmt.setString(2, alcoholName);
+        stmt.executeUpdate();
+    }
+    public boolean removeFavorite(long chatId, String alcoholName) {
         try {
+            int userId = getUserId(chatId);
+            if (userId == -1) return false;
+
             PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO cocktail_queries(user_id, cocktail_name) VALUES (?, ?)"
+                    "DELETE FROM favorites WHERE user_id = ? AND alcohol_name = ?"
             );
             stmt.setInt(1, userId);
-            stmt.setString(2, cocktailName);
-            stmt.executeUpdate();
+            stmt.setString(2, alcoholName);
+
+            int affected = stmt.executeUpdate();
+            return affected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
-
-    // cronologia
-    public List<String> getUserCocktailHistory(long chatId) {
-        List<String> history = new ArrayList<>();
+    public List<String> getFavorites(long chatId) throws SQLException {
+        List<String> favorites = new ArrayList<>();
         int userId = getUserId(chatId);
-        if (userId == -1) return history;
 
-        try {
-            PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT cocktail_name, queried_at FROM cocktail_queries " +
-                            "WHERE user_id = ? ORDER BY queried_at DESC LIMIT 20"
-            );
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                history.add(rs.getString("cocktail_name") + " ("
-                        + rs.getString("queried_at") + ")");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        PreparedStatement stmt = connection.prepareStatement(
+                "SELECT alcohol_name FROM favorites WHERE user_id = ?"
+        );
+        stmt.setInt(1, userId);
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            favorites.add(rs.getString("alcohol_name"));
         }
-        return history;
+        return favorites;
     }
 
-    // Numero cocktail dall'utente
-    public int getUserTotalQueries(long chatId) {
-        int total = 0;
-        int userId = getUserId(chatId);
-        if (userId == -1) return total;
+    // INFO PROFILO
+    public String getProfile(long chatId) throws SQLException {
+        PreparedStatement stmt = connection.prepareStatement(
+                "SELECT username, created_at FROM users WHERE chat_id = ?"
+        );
+        stmt.setLong(1, chatId);
+        ResultSet rs = stmt.executeQuery();
 
-        try {
-            PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(*) AS total FROM cocktail_queries WHERE user_id = ?"
-            );
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                total = rs.getInt("total");
+        if (!rs.next()) return "Abbiamo un problema.";
+
+        String username = rs.getString("username");
+        String createdAt = rs.getString("created_at");
+        List<String> favs = getFavorites(chatId);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Profilo utente\n");
+        sb.append("Username: ").append(username).append("\n");
+        sb.append("Alcolizzato dal : ").append(createdAt).append("\n\n");
+        sb.append("Alcolici preferiti:\n");
+
+        if (favs.isEmpty()) {
+            sb.append("Aggiungi qualcosa ai preferiti!\n");
+        } else {
+            for (String f : favs) {
+                sb.append("- ").append(f).append("\n");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return total;
+        return sb.toString();
     }
 }
