@@ -12,8 +12,8 @@ public class BotFunctions {
     private final Gson gson = new Gson();
 
     public static class CocktailInfo {
-        private final String description;   // TESTO
-        private final String imageUrl;      // URL immagine
+        private final String description;
+        private final String imageUrl;
 
         public CocktailInfo(String cocktailName, String description, String imageUrl) {
             this.description = description;
