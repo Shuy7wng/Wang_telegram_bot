@@ -1,6 +1,5 @@
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
@@ -20,6 +19,7 @@ public class CocktailBot implements LongPollingUpdateConsumer {
     private final OkHttpTelegramClient telegramClient;
     private final BotFunctions botFunctions = new BotFunctions();
 
+    // GIF
     private final File[] gifs;
 
     public CocktailBot(String botToken) {
@@ -35,6 +35,7 @@ public class CocktailBot implements LongPollingUpdateConsumer {
         }
     }
 
+    // Messaggio di benvenuto con GIF random
     private void handleStart(long chatId, String username) {
         try {
             if (gifs == null || gifs.length == 0) return;
@@ -65,6 +66,7 @@ public class CocktailBot implements LongPollingUpdateConsumer {
                 String text = msg.getText().trim();
                 String lowerText = text.toLowerCase();
 
+                // Salva utente se non esiste
                 db.saveUser(chatId, username);
 
                 switch (lowerText) {
@@ -93,21 +95,28 @@ public class CocktailBot implements LongPollingUpdateConsumer {
 
                     default -> {
                         if (lowerText.startsWith("/cocktail ")) {
-                            String name = text.substring(10).trim();
-                            BotFunctions.CocktailInfo cocktail = botFunctions.getCocktailInfo(name);
-                            if (cocktail.getDescription().contains("non trovato")) {
-                                telegramClient.execute(
-                                        SendMessage.builder()
-                                                .chatId(chatId)
-                                                .text("❌ Cocktail \"" + name + "\" non trovato.")
-                                                .build()
-                                );
-                            } else {
-                                sendCocktail(chatId, cocktail);
-                            }
-                            return;
+                            String[] parts = text.split(" ", 2);
 
-                        } else if (lowerText.startsWith("/ingredient")) {
+                            if (parts.length < 2 || parts[1].isBlank()) {
+                                telegramClient.execute(SendMessage.builder()
+                                        .chatId(chatId)
+                                        .text("⚠️ Devi specificare un cocktail. Esempio: /cocktail vodka")
+                                        .build());
+                            } else {
+                                String cocktailName = parts[1].trim();
+                                BotFunctions.CocktailInfo result = botFunctions.getCocktailInfo(cocktailName);
+
+                                if (result.getDescription().toLowerCase().contains("non trovato")) {
+                                    telegramClient.execute(SendMessage.builder()
+                                            .chatId(chatId)
+                                            .text("❌ Cocktail \"" + cocktailName + "\" non trovato.")
+                                            .build());
+                                } else {
+                                    sendCocktail(chatId, result);
+                                }
+                            }
+
+                    } else if (lowerText.startsWith("/ingredient")) {
                             String[] parts = text.split(" ", 2);
                             if (parts.length < 2 || parts[1].isBlank()) {
                                 telegramClient.execute(SendMessage.builder()
@@ -170,6 +179,8 @@ public class CocktailBot implements LongPollingUpdateConsumer {
                 }
             }
 
+
+            // Callback inline button (❤️ Adoro)
             if (update.hasCallbackQuery()) {
                 String data = update.getCallbackQuery().getData();
                 long chatId = update.getCallbackQuery().getMessage().getChatId();
@@ -192,7 +203,21 @@ public class CocktailBot implements LongPollingUpdateConsumer {
             e.printStackTrace();
         }
     }
-
+    // Estrae il nome del cocktail dalla descrizione testuale
+    private String extractCocktailName(String description) {
+        for (String line : description.split("\n")) {
+            if (line.startsWith("Nome:")) {
+                return line.substring(6).trim();
+            }
+        }
+        return "Cocktail";
+    }
+    /**
+     * Invia:
+     * - foto del cocktail
+     * - descrizione
+     * - bottone inline "Adoro"
+     */
     private void sendCocktail(long chatId, BotFunctions.CocktailInfo cocktail) throws Exception {
         if (cocktail.getImageUrl() != null) {
             telegramClient.execute(SendPhoto.builder()
@@ -220,12 +245,5 @@ public class CocktailBot implements LongPollingUpdateConsumer {
                 .build());
     }
 
-    private String extractCocktailName(String description) {
-        for (String line : description.split("\n")) {
-            if (line.startsWith("Nome:")) {
-                return line.substring(6).trim();
-            }
-        }
-        return "Cocktail";
-    }
+
 }

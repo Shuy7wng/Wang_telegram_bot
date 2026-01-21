@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataService {
+    // Singleton per usare UNA sola connessione DB
     private static DataService instance;
     private Connection connection;
 
@@ -27,6 +28,7 @@ public class DataService {
     private void createTables() throws SQLException {
         Statement stmt = connection.createStatement();
 
+        // Utenti Telegram
         stmt.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,6 +38,7 @@ public class DataService {
             )
         """);
 
+        // Preferiti per utente
         stmt.execute("""
             CREATE TABLE IF NOT EXISTS favorites (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
